@@ -543,23 +543,29 @@ async function removeSpecialDate(member, type) {
   if (type === "birthday") {
     if (window.birthdays) {
       delete window.birthdays[member];
-      localStorage.setItem(
-        window.APP_CONFIG.STORAGE_KEYS.BIRTHDAYS,
-        JSON.stringify(window.birthdays)
-      );
     }
   } else {
     if (window.anniversaries) {
       delete window.anniversaries[member];
-      try {
-        await saveToGoogleSheets("specialDates");
-      } catch (error) {
-        console.error("Google Sheets save failed, using localStorage:", error);
-        localStorage.setItem(
-          window.APP_CONFIG.STORAGE_KEYS.BIRTHDAYS,
-          JSON.stringify(window.birthdays)
-        );
-      }
+    }
+  }
+
+  // Save to Google Sheets with fallback
+  try {
+    await saveToGoogleSheets("specialDates");
+  } catch (error) {
+    console.error("Google Sheets save failed, using localStorage:", error);
+    // Fallback to localStorage
+    if (type === "birthday") {
+      localStorage.setItem(
+        window.APP_CONFIG.STORAGE_KEYS.BIRTHDAYS,
+        JSON.stringify(window.birthdays)
+      );
+    } else {
+      localStorage.setItem(
+        window.APP_CONFIG.STORAGE_KEYS.ANNIVERSARIES,
+        JSON.stringify(window.anniversaries)
+      );
     }
   }
 
