@@ -122,7 +122,7 @@ async function removeMember(memberName) {
   // Update UI
   populateUserDropdown();
   renderMemberList();
-  clearSelectedDates();
+  // REMOVED: clearSelectedDates(); <-- DELETE THIS LINE COMPLETELY
   renderCalendar();
   updateDashboard();
 
@@ -134,7 +134,7 @@ async function removeMember(memberName) {
     saveToLocalStorage();
   }
 
-  showMessage(`✅ Removed ${memberName} from the team`);
+  showMessage(`Removed ${memberName} from the team`);
 }
 
 function createModal(title, content, actions = []) {
@@ -289,6 +289,12 @@ document.addEventListener("keydown", function (e) {
     saveSelectedDates();
   }
 });
+
+// Temporary function to catch the error location
+window.clearSelectedDates = function () {
+  console.error("clearSelectedDates called from:", new Error().stack);
+  // Do nothing - just log where it's called from
+};
 
 // Make functions globally available
 window.populateUserDropdown = populateUserDropdown;
