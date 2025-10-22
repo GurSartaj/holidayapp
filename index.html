@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Holiday Tracker - Complete</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <span class="app-icon">📆</span>
+            <h1 class="app-title">Team Holiday Tracker</h1>
+        </div>
+        <div class="header-center">
+            <div class="member-select-container">
+                <label for="userSelect">Team Member:</label>
+                <select id="userSelect" class="member-dropdown">
+                    <!-- Options populated by JavaScript -->
+                </select>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav class="nav-tabs">
+                <button class="tab active" id="tab-calendar" onclick="switchTab('calendar')">
+                    📅 Calendar
+                </button>
+                <button class="tab" id="tab-dashboard" onclick="switchTab('dashboard')">
+                    📊 Dashboard
+                </button>
+                <button class="tab" id="tab-admin" onclick="switchTab('admin')">
+                    ⚙️ Admin
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Date Picker Modal -->
+    <div id="datePickerModal" class="date-picker-modal">
+        <div class="date-picker-content">
+            <h3>Jump to Date</h3>
+            <div class="date-picker-inputs">
+                <select id="yearPicker">
+                    <!-- Populated by JavaScript -->
+                </select>
+                <select id="monthPicker">
+                    <!-- Populated by JavaScript -->
+                </select>
+            </div>
+            <div class="date-picker-actions">
+                <button onclick="closeDatePicker()" class="btn btn-secondary">Cancel</button>
+                <button onclick="jumpToDate()" class="btn btn-primary">Go</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Calendar Tab -->
+        <section id="calendar" class="tab-content active">
+            <div class="calendar-container">
+
+                <!-- Add this flag as the first element -->
+                <div class="member-flag" id="memberFlag">
+                    <div class="member-flag-content">
+                        <span class="member-flag-icon">📝</span>
+                        <div class="member-flag-text">
+                            <div class="member-flag-label">EDITING</div>
+                            <div class="member-flag-name" id="memberFlagName">John Doe</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Header -->
+                <div class="calendar-header">
+                    <button id="prevMonth" onclick="changeMonth(-1)">‹</button>
+                    <h2 id="monthYear" onclick="openDatePicker()"></h2>
+                    <button id="nextMonth" onclick="changeMonth(1)">›</button>
+                </div>
+
+                <!-- Add this section right after the calendar-header div and before the calendar-grid div -->
+
+                <!-- Stats Pills Bar -->
+                <div class="quick-stats-container">
+                    <div class="quick-stat-pill">
+                        <div class="pill-icon">👥</div>
+                        <div class="pill-content">
+                            <div class="pill-value" id="stat-team-size">14</div>
+                            <div class="pill-label">Team</div>
+                        </div>
+                    </div>
+                    <div class="quick-stat-pill">
+                        <div class="pill-icon">📅</div>
+                        <div class="pill-content">
+                            <div class="pill-value" id="stat-people-on-leave">0</div>
+                            <div class="pill-label">On Leave</div>
+                        </div>
+                    </div>
+                    <div class="quick-stat-pill">
+                        <div class="pill-icon">📈</div>
+                        <div class="pill-content">
+                            <div class="pill-value" id="stat-peak-day">-</div>
+                            <div class="pill-label">Peak Day</div>
+                        </div>
+                    </div>
+                    <div class="quick-stat-pill">
+                        <div class="pill-icon">🔄</div>
+                        <div class="pill-content">
+                            <div class="pill-value" id="stat-overlap-days">0</div>
+                            <div class="pill-label">Overlap Days</div>
+                        </div>
+                    </div>
+                    <div class="quick-stat-pill">
+                        <div class="pill-icon">🏁</div>
+                        <div class="pill-content">
+                            <div class="pill-value" id="stat-weekend-spillover">0</div>
+                            <div class="pill-label">Weekend Spillover</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div id="calendar-grid" class="calendar-grid">
+                    <!-- Calendar days will be generated by JavaScript -->
+                </div>
+
+                <!-- Legend - positioned under calendar like original design -->
+                <div class="calendar-legend">
+                    <div class="legend-group">
+                        <span class="text-icon icon-full"></span>
+                        <span>Full day</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-morning"></span>
+                        <span>Morning</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-afternoon"></span>
+                        <span>Afternoon</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-pto"></span>
+                        <span>PTO</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-training"></span>
+                        <span>Training</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-conference"></span>
+                        <span>Conference</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-medical"></span>
+                        <span>Medical</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-other"></span>
+                        <span>Other</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-uk"></span>
+                        <span>UK Holiday</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-us"></span>
+                        <span>US Holiday</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-india"></span>
+                        <span>India Holiday</span>
+                    </div>
+                    <div class="legend-group">
+                        <span class="text-icon icon-custom"></span>
+                        <span>Custom Holiday</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <div class="action-buttons-left">
+                        <select id="leaveCategoryDropdown" class="leave-category-dropdown">
+                            <option value="PTO" selected>🔴 PTO/Vacation</option>
+                            <option value="Training">🔵 Training</option>
+                            <option value="Conference">🟢 Conference</option>
+                            <option value="Medical">🟣 Medical/Personal</option>
+                            <option value="Other">⚪ Other</option>
+                        </select>
+                        <button onclick="saveHolidays()" class="save-button">Save Holidays</button>
+                        <button onclick="clearPendingHolidays()" class="clear-button">Clear Pending</button>
+                    </div>
+                    <div style="margin-left: auto; font-size: 0.9em; color: #666;">
+                        <strong>Left click:</strong> Full day • <strong>Right click:</strong> Half day cycle
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add this after the action-buttons div in calendar tab -->
+
+            <!-- Team Gantt Chart -->
+            <div class="gantt-section" id="ganttSection">
+                <div class="gantt-header">
+                    <h3>Team Holiday Overview</h3>
+                    <button class="gantt-toggle-btn" id="ganttToggleBtn" onclick="toggleGantt()">
+                        <span class="toggle-icon">-</span> Hide Gantt
+                    </button>
+                </div>
+                <div class="gantt-container">
+                    <div class="gantt-table-wrapper">
+                        <table class="gantt-table" id="ganttTable">
+                            <!-- Generated by JavaScript -->
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Gantt Legend -->
+                <div class="gantt-legend">
+                    <div class="legend-item">
+                        <div class="legend-color full-day"></div>
+                        <span>Full Day</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color morning-half"></div>
+                        <span>Morning</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color afternoon-half"></div>
+                        <span>Afternoon</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color weekend"></div>
+                        <span>Weekend</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color today-marker"></div>
+                        <span>Today</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="teamInsightsSidePanel" class="team-insights-side-panel expanded">
+            <!-- Panel Header -->
+            <div class="side-panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">📊</span>
+                    <span class="panel-text">Team Insights</span>
+                </div>
+                <button id="sidePanelToggle" class="panel-toggle-btn">
+                    <span class="toggle-icon">◀</span>
+                </button>
+            </div>
+
+            <!-- Panel Content -->
+            <div class="side-panel-content"></div>
+            <!-- Tab Navigation -->
+            <div class="side-panel-tabs">
+                <button class="side-panel-tab active" data-tab="monthly">
+                    📅 Monthly
+                </button>
+                <button class="side-panel-tab" data-tab="holidays">
+                    🏖️ Holidays
+                </button>
+                <button class="side-panel-tab" data-tab="annual">
+                    📅 Annual
+                </button>
+            </div>
+
+            <!-- Monthly Tab Content -->
+            <div id="monthlyTab" class="side-panel-tab-content active">
+                <!-- Expand All Control -->
+                <div class="expand-all-container">
+                    <button id="expandAllBtn" class="expand-all-btn">
+                        📊 Expand All Metrics
+                    </button>
+                </div>
+
+                <!-- KPI Cards Container -->
+                <div class="kpi-cards-container">
+                    <!-- KPI Card 1: Total Leave Days -->
+                    <div class="collapsible-kpi-card" data-kpi="total-leave">
+                        <div class="kpi-card-header" onclick="toggleKPICard('total-leave')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">📅</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">Total Leave Days</div>
+                                    <div class="kpi-value" id="side-kpi-total-leave">—</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-total-leave-detail">
+                                <div class="kpi-trend" id="side-kpi-total-leave-trend"></div>
+                                <div class="kpi-description">Total leave days scheduled for this month</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Card 2: Working Days Available -->
+                    <div class="collapsible-kpi-card" data-kpi="working-days">
+                        <div class="kpi-card-header" onclick="toggleKPICard('working-days')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">✅</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">Working Days Available</div>
+                                    <div class="kpi-value" id="side-kpi-avail-pct">—%</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-working-days-detail">
+                                <div class="kpi-description">Percentage of team capacity available for work</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Card 9: Special Dates -->
+                    <div class="collapsible-kpi-card special" data-kpi="special-dates">
+                        <div class="kpi-card-header" onclick="toggleKPICard('special-dates')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">🎂</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">Special Dates This Month</div>
+                                    <div class="kpi-value" id="side-kpi-special-dates">—</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-special-dates-detail">
+                                <div class="kpi-special-list" id="side-kpi-special-dates-list"></div>
+                                <div class="kpi-description">Birthdays and work anniversaries this month</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- KPI Card 3: Off Today -->
+                    <div class="collapsible-kpi-card danger" data-kpi="off-today">
+                        <div class="kpi-card-header" onclick="toggleKPICard('off-today')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">🚨</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">Off Today</div>
+                                    <div class="kpi-value" id="side-kpi-off-today">—</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-off-today-detail">
+                                <div class="kpi-member-list" id="side-kpi-off-today-names"></div>
+                                <div class="kpi-description">Team members currently on leave today</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- KPI Card 4: At-Risk Days -->
+                    <div class="collapsible-kpi-card info" data-kpi="at-risk">
+                        <div class="kpi-card-header" onclick="toggleKPICard('at-risk')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">⚡</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">At-Risk Days</div>
+                                    <div class="kpi-value" id="side-kpi-at-risk">—</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-at-risk-detail">
+                                <div class="kpi-risk-list" id="side-kpi-at-risk-list"></div>
+                                <div class="kpi-description">Days with less than 3 team members available</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Card 5: Zero Leave Days -->
+                    <div class="collapsible-kpi-card success" data-kpi="zero-leave">
+                        <div class="kpi-card-header" onclick="toggleKPICard('zero-leave')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">🌟</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">Zero Leave Days</div>
+                                    <div class="kpi-value" id="side-kpi-zero-leave-days">—</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-zero-leave-detail">
+                                <div class="kpi-zero-msg" id="side-kpi-zero-leave-msg"></div>
+                                <div class="kpi-description">Working days with no team members on leave (excludes
+                                    weekends)</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- KPI Card 7: Upcoming Leave -->
+                    <div class="collapsible-kpi-card info" data-kpi="upcoming">
+                        <div class="kpi-card-header" onclick="toggleKPICard('upcoming')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">🗓️</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">Upcoming Leave (7-day)</div>
+                                    <div class="kpi-value" id="side-kpi-upcoming-leave">—</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-upcoming-detail">
+                                <div class="kpi-member-list" id="side-kpi-upcoming-leave-names"></div>
+                                <div class="kpi-description">Team members with leave scheduled in the next 7 days
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Card 8: Top Leave Takers -->
+                    <div class="collapsible-kpi-card" data-kpi="top-leave">
+                        <div class="kpi-card-header" onclick="toggleKPICard('top-leave')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">🏆</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">Top Leave Takers</div>
+                                    <div class="kpi-value" id="side-kpi-top-leave-num">—</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-top-leave-detail">
+                                <div class="kpi-member-list" id="side-kpi-top-leave-names"></div>
+                                <div class="kpi-description">Members with the most leave days this month</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Card 6: No Leave Takers -->
+                    <div class="collapsible-kpi-card info" data-kpi="no-leave">
+                        <div class="kpi-card-header" onclick="toggleKPICard('no-leave')">
+                            <div class="kpi-header-left">
+                                <span class="kpi-icon">🟩</span>
+                                <div class="kpi-header-info">
+                                    <div class="kpi-title">No Leave Takers</div>
+                                    <div class="kpi-value" id="side-kpi-no-leave-members">—</div>
+                                </div>
+                            </div>
+                            <span class="kpi-expand-arrow">▶</span>
+                        </div>
+                        <div class="kpi-card-content">
+                            <div class="kpi-detail" id="side-kpi-no-leave-detail">
+                                <div class="kpi-member-list" id="side-kpi-no-leave-members-list"></div>
+                                <div class="kpi-description">Team members with no leave scheduled this month</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </div>
+
+            <!-- Holidays Tab Content -->
+            <div id="holidaysTab" class="side-panel-tab-content">
+                <!-- Monthly Holidays Card -->
+                <div class="holiday-card">
+                    <div class="holiday-card-header">
+                        <span class="holiday-card-icon">📅</span>
+                        <span class="holiday-card-title">This Month</span>
+                    </div>
+                    <div class="holiday-card-content" id="monthlyHolidaysContent">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Yearly Holidays Card -->
+                <div class="holiday-card">
+                    <div class="holiday-card-header">
+                        <span class="holiday-card-icon">🗓️</span>
+                        <span class="holiday-card-title">This Year</span>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="holiday-filter-tabs">
+                        <button class="holiday-filter-tab active" data-filter="all"
+                            onclick="filterYearlyHolidays('all')">All</button>
+                        <button class="holiday-filter-tab" data-filter="US" onclick="filterYearlyHolidays('US')">🇺🇸
+                            US</button>
+                        <button class="holiday-filter-tab" data-filter="UK" onclick="filterYearlyHolidays('UK')">🇬🇧
+                            UK</button>
+                        <button class="holiday-filter-tab" data-filter="IN" onclick="filterYearlyHolidays('IN')">🇮🇳
+                            IN</button>
+                        <button class="holiday-filter-tab" data-filter="custom"
+                            onclick="filterYearlyHolidays('custom')">⭐ Custom</button>
+                    </div>
+
+                    <div class="holiday-card-content" id="yearlyHolidaysContent">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Special Tab Content -->
+            <div id="annualTab" class="side-panel-tab-content">
+                <!-- Annual KPI Cards Container -->
+                <div class="annual-kpi-cards-container">
+                    <!-- KPI cards will be dynamically populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <section id="dashboard" class="tab-content">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Team Holiday Dashboard</h2>
+                    <div class="dashboard-toggle">
+                        <button class="toggle-btn active" id="monthlyToggle"
+                            onclick="switchDashboardView('monthly')">Monthly</button>
+                        <button class="toggle-btn" id="annualToggle"
+                            onclick="switchDashboardView('annual')">Annual</button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Filters - Both Always Visible -->
+                <div class="dashboard-filters">
+                    <div class="filter-container">
+                        <!-- Year Filter (affects both monthly and annual charts) -->
+                        <div class="filter-group">
+                            <label for="yearFilter" class="filter-label">Year:</label>
+                            <select id="yearFilter" class="dashboard-filter-dropdown">
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+
+                        <!-- Month Filter (affects only monthly charts) -->
+                        <div class="filter-group">
+                            <label for="monthFilter" class="filter-label">Month:</label>
+                            <select id="monthFilter" class="dashboard-filter-dropdown">
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
+
+                        <!-- Current Selection Display -->
+                        <div class="filter-info">
+                            <span class="filter-status-label">Viewing:</span>
+                            <span id="currentFilterDisplay" class="current-filter">December 2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-content">
+                    <!-- Monthly Charts Section -->
+                    <div class="chart-section monthly-section">
+                        <h3 class="section-title">Monthly Focus</h3>
+
+                        <div class="chart-card chart-trend">
+                            <div class="chart-title">Monthly Leave Days by Member</div>
+                            <div class="chart-content">
+                                <canvas id="cumulativeTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card chart-comparison">
+                            <div class="chart-title">Monthly Distribution</div>
+                            <div class="chart-content">
+                                <canvas id="annualLeavePatternChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Annual Charts Section -->
+                    <div class="chart-section annual-section">
+                        <h3 class="section-title">Annual Focus</h3>
+
+                        <div class="chart-card chart-trend">
+                            <div class="chart-title">12-Month Team Leave Trend</div>
+                            <div class="chart-content">
+                                <canvas id="annualMonthlyTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card chart-comparison">
+                            <div class="chart-title">Annual Leave by Member</div>
+                            <div class="chart-content">
+                                <canvas id="annualMemberComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Tab -->
+        <section id="admin" class="tab-content">
+            <div class="admin-container">
+                <h2>Administration</h2>
+
+                <!-- Accordion Container -->
+                <div class="admin-accordion">
+
+                    <!-- Team Members Section -->
+                    <div class="accordion-item" data-section="team">
+                        <div class="accordion-header" onclick="toggleAccordion('team')">
+                            <div class="header-content">
+                                <span class="accordion-icon">👥</span>
+                                <div class="header-text">
+                                    <h3>Team Members</h3>
+                                    <p>Manage your team roster</p>
+                                </div>
+                            </div>
+                            <span class="accordion-arrow">▲</span>
+                        </div>
+                        <div class="accordion-content expanded">
+                            <div class="add-member">
+                                <input type="text" id="newMemberName" placeholder="Enter member name">
+                                <button onclick="addMember()" class="btn btn-primary">Add Member</button>
+                            </div>
+                            <ul id="memberList" class="member-list">
+                                <!-- Populated by JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Holidays & Events Section -->
+                    <div class="accordion-item" data-section="holidays">
+                        <div class="accordion-header" onclick="toggleAccordion('holidays')">
+                            <div class="header-content">
+                                <span class="accordion-icon">📅</span>
+                                <div class="header-text">
+                                    <h3>Holidays & Events</h3>
+                                    <p>Add custom and public holidays</p>
+                                </div>
+                            </div>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="holiday-creator">
+                                <!-- Holiday Type Selection -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Holiday Type</label>
+                                        <div style="display: flex; gap: 15px; margin-top: 5px;">
+                                            <label style="display: flex; align-items: center; gap: 5px;">
+                                                <input type="radio" name="holidayType" value="custom" checked
+                                                    onchange="toggleHolidayType()">
+                                                <span>Custom Holiday</span>
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 5px;">
+                                                <input type="radio" name="holidayType" value="public"
+                                                    onchange="toggleHolidayType()">
+                                                <span>Public Holiday</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="holidayName">Holiday Name</label>
+                                        <input type="text" id="holidayName" placeholder="e.g., Company Retreat">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="holidayDate">Date</label>
+                                        <input type="date" id="holidayDate">
+                                    </div>
+                                    <button onclick="addHoliday()" class="btn btn-primary">Add Holiday</button>
+                                </div>
+
+                                <!-- Region Selection (hidden by default) -->
+                                <div id="regionSelection" class="form-group" style="display: none;">
+                                    <label>Region</label>
+                                    <div style="display: flex; gap: 15px; margin-top: 5px;">
+                                        <label style="display: flex; align-items: center; gap: 5px;">
+                                            <input type="radio" name="holidayRegion" value="US" checked>
+                                            <span>🇺🇸 United States</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 5px;">
+                                            <input type="radio" name="holidayRegion" value="UK">
+                                            <span>🇬🇧 United Kingdom</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 5px;">
+                                            <input type="radio" name="holidayRegion" value="IN">
+                                            <span>🇮🇳 India</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Existing Holidays List -->
+                            <div class="holiday-list">
+                                <h4>Existing Holidays</h4>
+                                <div id="existingHolidaysList">
+                                    <!-- Populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Special Dates Section -->
+                    <div class="accordion-item" data-section="special">
+                        <div class="accordion-header" onclick="toggleAccordion('special')">
+                            <div class="header-content">
+                                <span class="accordion-icon">🎂</span>
+                                <div class="header-text">
+                                    <h3>Special Dates</h3>
+                                    <p>Birthdays and work anniversaries</p>
+                                </div>
+                            </div>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="holiday-creator">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="specialDateMember">Team Member</label>
+                                        <select id="specialDateMember">
+                                            <!-- Populated by JavaScript -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="specialDateType">Type</label>
+                                        <select id="specialDateType" onchange="toggleDateFields()">
+                                            <option value="birthday">Birthday</option>
+                                            <option value="anniversary">Work Anniversary</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Birthday Fields -->
+                                <div id="birthdayFields" class="form-row">
+                                    <div class="form-group">
+                                        <label for="birthdayDateInput">Birthday Date</label>
+                                        <input type="date" id="birthdayDateInput">
+                                    </div>
+                                </div>
+
+                                <!-- Anniversary Fields -->
+                                <div id="anniversaryFields" class="form-row" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="anniversaryYearInput">Start Year</label>
+                                        <input type="number" id="anniversaryYearInput" min="1990" max="2030"
+                                            placeholder="e.g., 2020">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="anniversaryDateInput">Anniversary Date</label>
+                                        <input type="date" id="anniversaryDateInput">
+                                    </div>
+                                </div>
+
+                                <button onclick="addSpecialDate()" class="btn btn-primary">Add Special Date</button>
+                            </div>
+
+                            <!-- Special Dates List -->
+                            <div class="holiday-list">
+                                <h4>Existing Special Dates</h4>
+                                <div id="specialDatesList">
+                                    <!-- Populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Management Section -->
+                    <div class="accordion-item" data-section="data">
+                        <div class="accordion-header" onclick="toggleAccordion('data')">
+                            <div class="header-content">
+                                <span class="accordion-icon">💾</span>
+                                <div class="header-text">
+                                    <h3>Data Management</h3>
+                                    <p>Export, import, and backup data</p>
+                                </div>
+                            </div>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="data-actions">
+                                <button onclick="exportData()" class="btn btn-secondary">Export Data</button>
+                                <button onclick="clearAllData()" class="btn btn-danger">Clear All Data</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+        <!-- Scripts -->
+        <script src="config.js"></script>
+        <script src="utils.js"></script>
+        <script src="calendar.js"></script>
+        <script src="dashboard.js"></script>
+        <script src="gantt.js"></script>
+        <script src="ui-components.js"></script>
+        <script src="script.js"></script>
+        <script src="google-sheets-integration.js"></script>
+        <script src="sidepanel.js"></script>
+
+        <button id="sidePanelFloatingToggle" class="floating-toggle-btn" onclick="toggleSidePanel()"
+            title="Open Team Insights">
+            📊
+        </button>
+</body>
+
+</html>
