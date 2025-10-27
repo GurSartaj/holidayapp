@@ -100,10 +100,7 @@ function saveToGoogleSheets(dataType = "all", dataObject = null) {
 
     try {
       // Smart transport logic
-      const isLarge =
-        dataType === "holidays" ||
-        dataType === "all" ||
-        payloadStr.length > 1800;
+        const isLarge = payloadStr.length > 1800;
 
       if (!isLarge) {
         // GET path for small payloads
@@ -288,3 +285,4 @@ window.addEventListener("offline", () => {
 window.loadFromGoogleSheets = loadFromGoogleSheets;
 window.saveToGoogleSheets = saveToGoogleSheets;
 window.showSyncStatus = showSyncStatus;
+
