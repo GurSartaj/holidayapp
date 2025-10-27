@@ -517,7 +517,10 @@ function renderSpecialDatesList() {
     const item = document.createElement("div");
     item.className = "holiday-item";
 
-    const formattedDate = new Date(special.date).toLocaleDateString("en-US", {
+    // ✅ TIMEZONE-SAFE: Parse date manually
+    const [year, month, day] = special.date.split("-").map(Number);
+    const dateObj = new Date(year, month - 1, day); // Create local date
+    const formattedDate = dateObj.toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
     });
