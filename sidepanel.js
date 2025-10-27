@@ -275,14 +275,19 @@ function updateSidePanelKPIs() {
   let specialDatesDetails = [];
 
   // Count birthdays this month and collect details
+  // Count birthdays this month and collect details
   if (typeof birthdays !== "undefined" && birthdays) {
     Object.entries(birthdays).forEach(([member, birthDate]) => {
-      const birthDateObj = new Date(birthDate);
-      if (birthDateObj.getMonth() === month) {
+      // ✅ TIMEZONE-SAFE: Parse date components manually
+      const [yearPart, monthPart, dayPart] = birthDate.split("-").map(Number);
+      const birthMonth = monthPart - 1; // JavaScript months are 0-indexed
+      const birthDay = dayPart;
+
+      if (birthMonth === month) {
         specialDates++;
         specialDatesDetails.push({
           member: member,
-          date: birthDateObj.getDate(),
+          date: birthDay,
           type: "birthday",
           icon: "🎂",
           typeName: "Birthday",
