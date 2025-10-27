@@ -483,7 +483,9 @@ function renderSpecialDatesList() {
 
         if (typeof anniversaryData === "string") {
           displayDate = anniversaryData;
-          startYear = new Date(anniversaryData).getFullYear();
+          // ✅ TIMEZONE-SAFE: Parse year manually
+          const [year] = anniversaryData.split("-").map(Number);
+          startYear = year;
         } else {
           displayDate =
             anniversaryData.originalDate ||
@@ -905,3 +907,4 @@ window.toggleHolidayType = toggleHolidayType;
 window.addHoliday = addHoliday;
 window.removeHoliday = removeHoliday;
 window.filterYearlyHolidays = filterYearlyHolidays;
+
