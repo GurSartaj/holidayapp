@@ -302,10 +302,11 @@ function updateSidePanelKPIs() {
       let checkMonth, dayToCheck, startYear;
 
       if (typeof anniversaryData === "string") {
-        const anniversaryDateObj = new Date(anniversaryData);
-        checkMonth = anniversaryDateObj.getMonth();
-        dayToCheck = anniversaryDateObj.getDate();
-        startYear = anniversaryDateObj.getFullYear();
+        // ✅ TIMEZONE-SAFE: Parse date components manually
+        const [year, month, day] = anniversaryData.split("-").map(Number);
+        checkMonth = month - 1; // JavaScript months are 0-indexed
+        dayToCheck = day;
+        startYear = year;
       } else if (anniversaryData.monthDay) {
         const [monthNum, day] = anniversaryData.monthDay.split("-").map(Number);
         checkMonth = monthNum - 1;
@@ -884,3 +885,4 @@ window.filterYearlyHolidays = filterYearlyHolidays;
 window.renderAnnualKPICards = renderAnnualKPICards;
 window.toggleAnnualDetail = toggleAnnualDetail;
 window.calculateAnnualMetricsSimple = calculateAnnualMetricsSimple;
+
