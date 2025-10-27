@@ -1,6 +1,6 @@
 // ===================================================================
-// COMPLETE CALENDAR MODULE - FIXED
-// All original functionality with proper variable management
+// COMPLETE CALENDAR MODULE
+//
 // ===================================================================
 
 // Initialize global variables if they don't exist
@@ -188,11 +188,12 @@ function addSpecialDates(dayElement, date) {
   // Check birthdays
   if (window.birthdays) {
     Object.entries(window.birthdays).forEach(([member, birthDate]) => {
-      const birthDateObj = new Date(birthDate);
-      if (
-        birthDateObj.getMonth() === date.getMonth() &&
-        birthDateObj.getDate() === date.getDate()
-      ) {
+      // ✅ TIMEZONE-SAFE: Parse date components manually
+      const [year, month, day] = birthDate.split("-").map(Number);
+      const birthMonth = month - 1; // JavaScript months are 0-indexed
+      const birthDay = day;
+
+      if (birthMonth === date.getMonth() && birthDay === date.getDate()) {
         birthdayPeople.push(member);
       }
     });
@@ -202,49 +203,74 @@ function addSpecialDates(dayElement, date) {
   if (window.anniversaries) {
     Object.entries(window.anniversaries).forEach(
       ([member, anniversaryData]) => {
-        let monthToCheck, dayToCheck;
+        let anniversaryDate;
 
+        // Handle both old string format and new object format
         if (typeof anniversaryData === "string") {
-          const anniversaryDateObj = new Date(anniversaryData);
-          monthToCheck = anniversaryDateObj.getMonth();
-          dayToCheck = anniversaryDateObj.getDate();
+          anniversaryDate = anniversaryData;
         } else {
-          const [month, day] = anniversaryData.monthDay.split("-").map(Number);
-          monthToCheck = month - 1;
-          dayToCheck = day;
+          anniversaryDate =
+            anniversaryData.originalDate ||
+            `${anniversaryData.startYear}-${anniversaryData.monthDay}`;
         }
 
-        if (monthToCheck === date.getMonth() && dayToCheck === date.getDate()) {
+        // ✅ TIMEZONE-SAFE: Parse date components manually
+        const [year, month, day] = anniversaryDate.split("-").map(Number);
+        const anniversaryMonth = month - 1; // JavaScript months are 0-indexed
+        const anniversaryDay = day;
+
+        if (
+          anniversaryMonth === date.getMonth() &&
+          anniversaryDay === date.getDate()
+        ) {
           anniversaryPeople.push(member);
         }
       }
     );
   }
 
-  // Add icons if there are special dates
-  if (birthdayPeople.length > 0 || anniversaryPeople.length > 0) {
-    const iconsContainer = document.createElement("div");
-    iconsContainer.className = "special-date-icons";
+  // Add birthday icons and tooltips
+  if (birthdayPeople.length > 0) {
+    const birthdayIcon = document.createElement("div");
+    birthdayIcon.className = "special-date-icon birthday-icon";
+    birthdayIcon.textContent = "🎂";
+    birthdayIcon.style.cssText = `
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 12px;
+      z-index: 2;
+    `;
+    dayElement.appendChild(birthdayIcon);
 
-    if (birthdayPeople.length > 0) {
-      const birthdayIcon = document.createElement("span");
-      birthdayIcon.className = "birthday-icon";
-      birthdayIcon.textContent = "🎂";
-      birthdayIcon.title = `Birthday: ${birthdayPeople.join(", ")}`;
-      iconsContainer.appendChild(birthdayIcon);
-    }
+    // Add tooltip
+    const birthdayTooltip = document.createElement("div");
+    birthdayTooltip.className = "tooltip birthday-tooltip";
+    birthdayTooltip.textContent = `Birthday: ${birthdayPeople.join(", ")}`;
+    dayElement.appendChild(birthdayTooltip);
+  }
 
-    if (anniversaryPeople.length > 0) {
-      const anniversaryIcon = document.createElement("span");
-      anniversaryIcon.className = "anniversary-icon";
-      anniversaryIcon.textContent = "🏆";
-      anniversaryIcon.title = `Work Anniversary: ${anniversaryPeople.join(
-        ", "
-      )}`;
-      iconsContainer.appendChild(anniversaryIcon);
-    }
+  // Add anniversary icons and tooltips
+  if (anniversaryPeople.length > 0) {
+    const anniversaryIcon = document.createElement("div");
+    anniversaryIcon.className = "special-date-icon anniversary-icon";
+    anniversaryIcon.textContent = "🏆";
+    anniversaryIcon.style.cssText = `
+      position: absolute;
+      top: 2px;
+      right: ${birthdayPeople.length > 0 ? "16px" : "2px"};
+      font-size: 12px;
+      z-index: 2;
+    `;
+    dayElement.appendChild(anniversaryIcon);
 
-    dayElement.appendChild(iconsContainer);
+    // Add tooltip
+    const anniversaryTooltip = document.createElement("div");
+    anniversaryTooltip.className = "tooltip anniversary-tooltip";
+    anniversaryTooltip.textContent = `Anniversary: ${anniversaryPeople.join(
+      ", "
+    )}`;
+    dayElement.appendChild(anniversaryTooltip);
   }
 }
 
@@ -628,35 +654,62 @@ function calculateMemberHolidays(member, year, month) {
   return { totalDays, holidayDates };
 }
 
-// Load data from localStorage
+// Load data from localStorage - ONLY if not already loaded from Google Sheets
 function loadHolidayDataFromStorage() {
   try {
-    const saved = localStorage.getItem(
-      window.APP_CONFIG.STORAGE_KEYS.CUSTOM_HOLIDAYS
-    );
-    if (saved) window.customHolidays = JSON.parse(saved);
+    // Only load custom holidays if not already set
+    if (
+      !window.customHolidays ||
+      Object.keys(window.customHolidays).length === 0
+    ) {
+      const saved = localStorage.getItem(
+        window.APP_CONFIG.STORAGE_KEYS.CUSTOM_HOLIDAYS
+      );
+      if (saved) window.customHolidays = JSON.parse(saved);
+    }
 
-    const savedPublic = localStorage.getItem(
-      window.APP_CONFIG.STORAGE_KEYS.PUBLIC_HOLIDAYS
-    );
-    if (savedPublic) window.publicHolidays = JSON.parse(savedPublic);
+    // Only load public holidays if not already set
+    if (
+      !window.publicHolidays ||
+      Object.keys(window.publicHolidays).length === 0
+    ) {
+      const savedPublic = localStorage.getItem(
+        window.APP_CONFIG.STORAGE_KEYS.PUBLIC_HOLIDAYS
+      );
+      if (savedPublic) window.publicHolidays = JSON.parse(savedPublic);
+    }
 
-    const savedBirthdays = localStorage.getItem(
-      window.APP_CONFIG.STORAGE_KEYS.BIRTHDAYS
-    );
-    if (savedBirthdays) window.birthdays = JSON.parse(savedBirthdays);
+    // Only load birthdays if not already set
+    if (!window.birthdays || Object.keys(window.birthdays).length === 0) {
+      const savedBirthdays = localStorage.getItem(
+        window.APP_CONFIG.STORAGE_KEYS.BIRTHDAYS
+      );
+      if (savedBirthdays) window.birthdays = JSON.parse(savedBirthdays);
+    }
 
-    const savedAnniversaries = localStorage.getItem(
-      window.APP_CONFIG.STORAGE_KEYS.ANNIVERSARIES
-    );
-    if (savedAnniversaries)
-      window.anniversaries = JSON.parse(savedAnniversaries);
+    // Only load anniversaries if not already set
+    if (
+      !window.anniversaries ||
+      Object.keys(window.anniversaries).length === 0
+    ) {
+      const savedAnniversaries = localStorage.getItem(
+        window.APP_CONFIG.STORAGE_KEYS.ANNIVERSARIES
+      );
+      if (savedAnniversaries)
+        window.anniversaries = JSON.parse(savedAnniversaries);
+    }
 
-    const savedEnhanced = localStorage.getItem(
-      window.APP_CONFIG.STORAGE_KEYS.ENHANCED_HOLIDAYS
-    );
-    if (savedEnhanced)
-      window.enhancedCustomHolidays = JSON.parse(savedEnhanced);
+    // Enhanced custom holidays
+    if (
+      !window.enhancedCustomHolidays ||
+      Object.keys(window.enhancedCustomHolidays).length === 0
+    ) {
+      const savedEnhanced = localStorage.getItem(
+        window.APP_CONFIG.STORAGE_KEYS.ENHANCED_HOLIDAYS
+      );
+      if (savedEnhanced)
+        window.enhancedCustomHolidays = JSON.parse(savedEnhanced);
+    }
   } catch (error) {
     console.error("Error loading holiday data:", error);
   }
