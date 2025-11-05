@@ -196,7 +196,7 @@ function updateSidePanelKPIs() {
     }).length;
 
     const peopleAvailable = teamMembers.length - peopleOff;
-    if (peopleAvailable < 3) {
+    if (peopleAvailable < 6) {
       atRiskDays++;
       atRiskDaysList.push(`${d}/${month + 1} (${peopleAvailable} available)`);
     }
@@ -885,3 +885,4 @@ window.filterYearlyHolidays = filterYearlyHolidays;
 window.renderAnnualKPICards = renderAnnualKPICards;
 window.toggleAnnualDetail = toggleAnnualDetail;
 window.calculateAnnualMetricsSimple = calculateAnnualMetricsSimple;
+
